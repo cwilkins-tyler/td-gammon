@@ -4,8 +4,8 @@ import time
 import random
 import numpy as np
 
-class Game:
 
+class Game:
     LAYOUT = "0-2-o,5-5-x,7-3-x,11-5-o,12-5-x,16-3-o,18-5-o,23-2-x"
     NUMCOLS = 24
     QUAD = 6
@@ -60,7 +60,7 @@ class Game:
         return np.array(features).reshape(1, -1)
 
     def roll_dice(self):
-        return (random.randint(1, self.die), random.randint(1, self.die))
+        return random.randint(1, self.die), random.randint(1, self.die)
 
     def play(self, players, draw=False):
         player_num = random.randint(0, 1)
@@ -135,7 +135,6 @@ class Game:
             else:
                 self.grid[s].append(piece)
 
-
     def get_actions(self, roll, player, nodups=False):
         """
         Get set of all possible move tuples
@@ -147,11 +146,11 @@ class Game:
             start = None
 
         r1, r2 = roll
-        if r1 == r2: # doubles
+        if r1 == r2:  # doubles
             i = 4
             # keep trying until we find some moves
             while not moves and i > 0:
-                self.find_moves(tuple([r1]*i), player, (), moves, start)
+                self.find_moves(tuple([r1] * i), player, (), moves, start)
                 i -= 1
         else:
             self.find_moves(roll, player, (), moves, start)
@@ -159,12 +158,12 @@ class Game:
             # has no moves, try moving only one piece
             if not moves:
                 for r in roll:
-                    self.find_moves((r, ), player, (), moves, start)
+                    self.find_moves((r,), player, (), moves, start)
 
         return moves
 
     def find_moves(self, rs, player, move, moves, start=None):
-        if len(rs)==0:
+        if len(rs) == 0:
             moves.add(move)
             return
         r, rs = rs[0], rs[1:]
@@ -173,12 +172,12 @@ class Game:
             if self.can_onboard(player, r):
                 piece = self.bar_pieces[player].pop()
                 bar_piece = None
-                if len(self.grid[r - 1]) == 1 and self.grid[r - 1][-1]!=player:
+                if len(self.grid[r - 1]) == 1 and self.grid[r - 1][-1] != player:
                     bar_piece = self.grid[r - 1].pop()
 
                 self.grid[r - 1].append(piece)
 
-                self.find_moves(rs, player, move+((Game.ON, r - 1), ), moves, start)
+                self.find_moves(rs, player, move + ((Game.ON, r - 1),), moves, start)
                 self.grid[r - 1].pop()
                 self.bar_pieces[player].append(piece)
                 if bar_piece:
@@ -195,10 +194,10 @@ class Game:
 
                 piece = self.grid[i].pop()
                 bar_piece = None
-                if len(self.grid[i+r]) == 1 and self.grid[i+r][-1] != player:
+                if len(self.grid[i + r]) == 1 and self.grid[i + r][-1] != player:
                     bar_piece = self.grid[i + r].pop()
                 self.grid[i + r].append(piece)
-                self.find_moves(rs, player, move + ((i, i + r), ), moves, start)
+                self.find_moves(rs, player, move + ((i, i + r),), moves, start)
                 self.grid[i + r].pop()
                 self.grid[i].append(piece)
                 if bar_piece:
@@ -208,7 +207,7 @@ class Game:
             if offboarding and self.remove_piece(player, i, r):
                 piece = self.grid[i].pop()
                 self.off_pieces[player].append(piece)
-                self.find_moves(rs, player, move + ((i, Game.OFF), ), moves, start)
+                self.find_moves(rs, player, move + ((i, Game.OFF),), moves, start)
                 self.off_pieces[player].pop()
                 self.grid[i].append(piece)
 
@@ -271,7 +270,7 @@ class Game:
         for i in range(Game.NUMCOLS - self.die, Game.NUMCOLS):
             if len(self.grid[i]) > 0 and self.grid[i][0] == player:
                 count += len(self.grid[i])
-        if count+len(self.off_pieces[player]) == self.num_pieces[player]:
+        if count + len(self.off_pieces[player]) == self.num_pieces[player]:
             return True
         return False
 
@@ -314,38 +313,36 @@ class Game:
                 return True
         return False
 
-    def draw_col(self,i,col):
-        print "|",
-        if i==-2:
-            if col<10:
-                print "",
-            print str(col),
-        elif i==-1:
-            print "--",
-        elif len(self.grid[col])>i:
-            print " "+self.grid[col][i],
+    def draw_col(self, i, col):
+        print("|", end='')
+        if i == -2:
+            if col < 10:
+                print("", end='')
+            print(str(col), end='')
+        elif i == -1:
+            print("--", end='')
+        elif len(self.grid[col]) > i:
+            print(" " + self.grid[col][i], end='')
         else:
-            print "  ",
+            print("  ", end='')
 
     def draw(self):
         os.system('clear')
-        largest = max([len(self.grid[i]) for i in range(len(self.grid)/2,len(self.grid))])
-        for i in range(-2,largest):
-            for col in range(len(self.grid)/2,len(self.grid)):
-                self.draw_col(i,col)
-            print "|"
-        print
-        print
-        largest = max([len(self.grid[i]) for i in range(len(self.grid)/2)])
-        for i in range(largest-1,-3,-1):
-            for col in range(len(self.grid)/2-1,-1,-1):
-                self.draw_col(i,col)
-            print "|"
+        largest = max([len(self.grid[i]) for i in range(int(len(self.grid) / 2), len(self.grid))])
+        for i in range(-2, largest):
+            for col in range(int(len(self.grid) / 2), len(self.grid)):
+                self.draw_col(i, col)
+            print("|")
+
+        largest = max([len(self.grid[i]) for i in range(int(len(self.grid) / 2))])
+        for i in range(largest - 1, -3, -1):
+            for col in range(int(len(self.grid) / 2 - 1), -1, -1):
+                self.draw_col(i, col)
+            print("|")
         for t in self.players:
-            print "<Player %s>  Off Board : "%(t),
+            print("<Player %s>  Off Board : " % t)
             for piece in self.off_pieces[t]:
-                print t+'',
-            print "   Bar : ",
+                print(t + '')
+            print("   Bar : ")
             for piece in self.bar_pieces[t]:
-                print t+'',
-            print
+                print(t + '')
